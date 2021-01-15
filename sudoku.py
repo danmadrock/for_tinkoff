@@ -1,6 +1,10 @@
 import random
 import pickle
+
 class Sudoku():
+	def menu(self):
+		pass
+
 	def load_file(self):
 		pass
 		
@@ -181,12 +185,22 @@ class Sudoku():
   """)
 
 	def player_mode(self, side):
+		"""
+		функция определяет режим игры: для игрока иначе pass
+		"""
 		if side == 0:
 			pass
 		else:
 			self.player_play()
 
 	def player_play(self):
+		"""
+		функция описывет функционал игрока
+		основная игра – описана в цикле while
+		после выхода из него игра считается выигранной игроком/сохранненной
+		в итоге выводится либо функция поздравления с победой
+		либо функция позволяющая продолжить ранее сохраненную игру
+		"""
 		grid = self.start_grid()
 		print("\nНачнем игру!\n")
 		self.display_grid(grid)
@@ -203,7 +217,10 @@ class Sudoku():
 				print('\nОшибка! Данная ячейка уже занята!\n')
 				continue
 
-		self.congrats_for_p()
+		if not self.save_file():
+			self.congrats_for_p()
+		else:
+			self.menu()
 
 	def if_uniq(self, grid, row, col, num):
 		trans_grid = list(map(list, zip(*grid)))
@@ -230,11 +247,40 @@ class Sudoku():
 			Хочешь опробовать то, решить ли компьютер твою задачу?
 			Запусти игру в режиме для компьютера. 
 			Спасибо за то, что играл! Удачи!""")
+	
+	def comp_mode(self, side):
+		if side == 1:
+			pass
+		else:
+			grid = self.start_grid()
+			comp_play(grid)
+
+	def comp_play(self, grid):
+		pass
+
+	def valid(self):
+		pass
+
+	def find_empty(self, grid):
+		for i in range(len(grid)):
+			for j in range(len(grid[i])):
+				if grid[i][j] == 0:
+					return (i, j)
+
+		return None
+
+	def congrats_for_algo(self):
+		pass
+
+	def lose_algo(self):
+		pass
 
 	def main(self):
+		self.menu()
 		self.print_rules()
 		self.choose_side()
-		self.player_play()
+		self.comp_mode(side)
+		self.player_mode(side)
 
 
 game = Sudoku()
