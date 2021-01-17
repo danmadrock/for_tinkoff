@@ -2,40 +2,25 @@ import random
 import pickle
 
 class Sudoku():
+	def __init__(self, side):
+		self.side = side
+
 	def menu(self):
-		pass
-
-	def load_file(self):
-		pass
-		
-	def save_file(self):
-		pass
-
-	def choose_side(self):
-		"""
-		Функция позволяет игроку определить 
-		на какой стороне играть.
-		"""
-		answer = int(input('\nВведите 0/1 соответствующий игровому режиму'))
-
-		while answer not in range(0, 2):
-			print('Error: введите корректный ответ')
-			answer = int(input('\nВведите 0/1 соответствующий игровому режиму'))
-
-		if answer == 1:
-			print('Отлично! Вы играете за себя! Удачи.')
-			side = 1
-		elif answer == 0:
-			print('Отлично! За Вас будет играть Ваша стратегия!')
-			side = 0
+		print(f"""
+			Добро пожаловать в консольную игру – Судоку!
+			В данной игре Вам придется решить Судоку – головоломку с числами на доске 9х9\n
+			""")
+		ask_load = str(input("Хотите загрузить игру?(да/Enter): "))
+		if ask_load == "да":
+			load_file()
+		else:
+			new_game = input("Желаете начать новую игру – нажмите Enter")
 
 	def print_rules(self):
 		"""
 		Данная функция выводит правила игры.
 		"""
 		print("""
-			Добро пожаловать в консольную игру – Судоку!
-			В данной игре Вам придется решить Судоку – головоломку с числами на доске 9х9\n
 			Правила довольно просты:
 				1. Сперва, Вам придется выбрать сторону, за которую Вы хотите играть:
 					1. Введите 0 – если хотите играть за компьютер, суть заключается в том, что
@@ -53,7 +38,8 @@ class Sudoku():
 				2. Ввести количество заполненных ячеек, тем самым Вы можете определить для
 				себя сложность игры: чем больше заполненных изначально ячеек - тем проще игра.\n
 				3. Затем, в зависимости от выбранной стороны, Вам придется вводить определенные
-				комманды вида: (Строка, Колонка, Число) или ожидать конца работы алгоритма. \n 
+				комманды вида: (Строка, Колонка, Число) или ожидать конца работы алгоритма. \n
+				4. Если желаете сохранить игру, то \n
 			Удачной игры!
 			""")
 
@@ -113,20 +99,39 @@ class Sudoku():
 
 		return grid2
 
-	def swap_all_rows(self, grid):
-		pass
+	def swap_rows_in_boxes(self, grid):
+		i = random.randrange(0, 8, 3)
+		
 
-	def swap_all_cols(self, grid):
-		pass
+		if i == 0:
+			grid[i:i+3], grid[i+3:i+6] = grid[i+3:i+6], grid[i:i+3]
+		elif i == 3:
+			choice = random.randint(0,1)
+			if choice == 0:
+				grid[i:i+3], grid[i-3:i] = grid[i-3:i], grid[i:i+3]
+			else:
+				grid[i:i+3], grid[i+3:i+6] = grid[i+3:i+6], grid[i:i+3]
+		elif i == 6:
+			grid[i:i+3], grid[i-3:i] = grid[i-3:i], grid[i:i+3]
+
+		
+		return grid
+
+	def swap_cols_in_boxes(self, grid):
+		var = list(map(list, zip(*grid)))
+		grid1 = self.swap_rows_in_boxes(var)
+		grid2 = list(map(list, zip(*grid1)))
+
+		return grid2
 
 	def randomize(self, grid):
 		"""
 		функция применяет 9 случайных элементарных
-		преобразований из имеющихся
-		func - случайная функция из списка имеющихся
-		grid - применение преобхования к доске
+		преобразований из имеющихся функций 
+		func - случайная функция из списка имеющихся функций
+		grid - применение преобразования к доске
 		"""
-		functions = [self.swap_cols, self.swap_rows]
+		functions = [self.swap_cols, self.swap_rows, self.swap_cols_in_boxes, self.swap_rows_in_boxes]
 
 
 		for _ in range(1, 10):
@@ -185,27 +190,23 @@ class Sudoku():
   """)
 
 	def player_mode(self, side):
-		"""
-		функция определяет режим игры: для игрока иначе pass
-		"""
 		if side == 0:
 			pass
 		else:
 			self.player_play()
 
 	def player_play(self):
-		"""
-		функция описывет функционал игрока
-		основная игра – описана в цикле while
-		после выхода из него игра считается выигранной игроком/сохранненной
-		в итоге выводится либо функция поздравления с победой
-		либо функция позволяющая продолжить ранее сохраненную игру
-		"""
 		grid = self.start_grid()
 		print("\nНачнем игру!\n")
 		self.display_grid(grid)
-		
+
+
 		while not self.winner(grid):
+			save_game = input("Желаете сохранить игру: (да/нет): ")
+			if save_game == "да":
+				save_file(Sudoku)
+				exit(0)
+
 			row = int(input("Введите номер строчки: "))
 			print()
 			col = int(input("Введите номер столбца: "))
@@ -217,10 +218,8 @@ class Sudoku():
 				print('\nОшибка! Данная ячейка уже занята!\n')
 				continue
 
-		if not self.save_file():
-			self.congrats_for_p()
-		else:
-			self.menu()
+
+		self.congrats_for_p()
 
 	def if_uniq(self, grid, row, col, num):
 		trans_grid = list(map(list, zip(*grid)))
@@ -253,35 +252,119 @@ class Sudoku():
 			pass
 		else:
 			grid = self.start_grid()
-			comp_play(grid)
+			#self.display_grid(grid)
+			self.comp_play(grid)
 
 	def comp_play(self, grid):
-		pass
+		find = self.find_empty(grid)
+		self.display_grid(grid)
+		if not find:
+			self.congrats_for_c()
+			return True
+		else:
+			row, col = find
 
-	def valid(self):
-		pass
+
+		for i in range(1,10):
+			if self.valid(grid, i, (row, col)):
+				grid[row][col] = i
+				print(f"""
+					Ход компьютера: 
+					1. Строка: {row}
+					2. Столбец: {col}
+					3. Значение: {grid[row][col]}
+					""")
+				save_game = input("Желаете сохранить игру: (да/нет): ")
+
+				if save_game == "да":
+					save_file(Sudoku)
+					exit(0)
+
+				next_iter = input("Чтобы перейти к следующей итерации нажмите Enter: ") #!!!!
+				if self.comp_play(grid):
+					return True
+
+				grid[row][col] = '*'
+
+
+		return False
+
+	def valid(self, grid, num, pos):
+		for i in range(len(grid[0])):
+			if grid[pos[0]][i] == num and pos[1] != i:
+				return False
+
+		for i in range(len(grid)):
+			if grid[i][pos[1]] == num and pos[0] != i:
+				return False
+
+		box_x = pos[1] // 3
+		box_y = pos[0] // 3
+
+		for i in range(box_y*3, box_y*3 + 3):
+			for j in range(box_x * 3, box_x*3 + 3):
+				if grid[i][j] == num and (i,j) != pos:
+					return False
+
+		return True
 
 	def find_empty(self, grid):
+
 		for i in range(len(grid)):
 			for j in range(len(grid[i])):
-				if grid[i][j] == 0:
+				if grid[i][j] == '*':
 					return (i, j)
 
-		return None
+		return None 
 
-	def congrats_for_algo(self):
-		pass
+	def congrats_for_c(self):
+		print(f"""Отлично! Алгоритм справился с этой задачей!
+			Если хочешь сыграть сам перезапусти программу и выбри режим игрока.
+			Спасибо за игру! Удачи!""")
 
 	def lose_algo(self):
-		pass
+		print(f"""К сожалению алгоритм не смог решить Вашу задачу.
+			Ваша задача оказалась действительно сложной.
+			Попробуйте сыграть сами или запустите алгоритм снова,
+			перезапустив игру.
+			""")
 
 	def main(self):
 		self.menu()
 		self.print_rules()
-		self.choose_side()
-		self.comp_mode(side)
-		self.player_mode(side)
+		self.comp_mode(self.side)
+		self.player_mode(self.side)
 
 
-game = Sudoku()
+def choose_side():
+	print(f"""
+    0 - игровой режим, при котором за Вас играет заранее определенный алгоритм
+    1 - игровой режим, при котором Вам самим придется управлять""")
+
+	answer = int(input('\nВведите 0/1 соответствующий игровому режиму: '))
+
+	while answer not in range(0, 2):
+		print('Error: введите корректный ответ')
+		answer = int(input('\nВведите 0/1 соответствующий игровому режиму: '))
+	
+	if answer == 1:
+		return 1
+	elif answer == 0:
+		return 0
+
+def save_file(class_object):
+	global pickle_obj
+	pickle_obj = "pickle.dat"
+	with open(pickle_obj, "wb") as f:
+		pickle.dump(class_object, f)
+
+
+def load_file():
+	with open("pickle.dat", "rb") as f:
+		print(pickle.load(f))
+       
+
+side = choose_side()
+game = Sudoku(side)
 game.main()
+
